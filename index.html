@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wordsearch Maker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="rainbow">
+  <div id="floaters" class="floaters" aria-hidden="true"></div>
+
+  <header class="top">
+    <h1 id="siteTitle">Wordsearch Maker</h1>
+    <p>Pick a shape, add your words, and get a puzzle where every word is hidden exactly once!</p>
+  </header>
+
+  <main class="layout">
+    <section class="controls" aria-label="Puzzle settings">
+
+      <div class="field">
+        <h2>Shape</h2>
+        <div id="shapePicker" class="chips shapes" role="group" aria-label="Grid shape"></div>
+      </div>
+
+      <div class="field">
+        <h2>Size</h2>
+        <div id="sizePicker" class="chips" role="group" aria-label="Grid size"></div>
+      </div>
+
+      <div class="field">
+        <h2>Word directions</h2>
+        <div class="dir-row">
+          <div id="compass" class="compass" role="group" aria-label="Allowed directions"></div>
+          <div id="presetPicker" class="presets" role="group" aria-label="Direction presets">
+            <button type="button" class="chip" data-preset="simple" aria-pressed="false">Simple<small>→ ↓ only</small></button>
+            <button type="button" class="chip" data-preset="diagonals" aria-pressed="false">Diagonals<small>→ ↓ ↘ ↗</small></button>
+            <button type="button" class="chip" data-preset="all" aria-pressed="false">Everything<small>incl. backwards</small></button>
+          </div>
+        </div>
+        <p class="hint">Click arrows to fine-tune which ways words may run.</p>
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <h2>Your words</h2>
+          <button type="button" id="example" class="link">✨ Try an example</button>
+        </div>
+        <label class="sr" for="title">Puzzle title</label>
+        <input id="title" type="text" placeholder="Puzzle title (optional)" maxlength="40">
+        <label class="sr" for="words">Words to hide</label>
+        <textarea id="words" rows="9" spellcheck="false" placeholder="Type or paste 10–20 words, one per line (or separated by commas or spaces)"></textarea>
+        <div id="wordCount" class="count">0 words (10–20 works best)</div>
+        <ul id="wordIssues" class="issues" aria-live="polite"></ul>
+      </div>
+
+      <div class="field">
+        <h2>Theme &amp; style</h2>
+        <div id="themePicker" class="chips themes" role="group" aria-label="Puzzle theme"></div>
+        <div id="letterPicker" class="chips letters" role="group" aria-label="Letter style">
+          <button type="button" class="chip" data-letters="tiles" aria-pressed="true">Colorful tiles</button>
+          <button type="button" class="chip" data-letters="plain" aria-pressed="false">Plain letters</button>
+        </div>
+        <label class="row check">
+          <input id="nameLine" type="checkbox" checked>
+          <span>Add a “Name / Date” line for school</span>
+        </label>
+      </div>
+
+      <details class="field advanced">
+        <summary>Fine-tuning</summary>
+        <label class="row">
+          <span>Avoid accidental English words of</span>
+          <select id="strictness">
+            <option value="3">3+ letters (strictest, may be slow)</option>
+            <option value="4" selected>4+ letters</option>
+            <option value="5">5+ letters</option>
+            <option value="0">Don’t check</option>
+          </select>
+        </label>
+        <label class="row check">
+          <input id="blockBad" type="checkbox" checked>
+          <span>Also block rude words (in every direction, even backwards)</span>
+        </label>
+        <label class="row">
+          <span>Filler letters imitate my words: <b id="matchVal">60%</b></span>
+          <input id="matchStrength" type="range" min="0" max="100" value="60">
+        </label>
+      </details>
+
+      <button id="generate" class="primary" type="button" disabled>Make my puzzle!</button>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="stage" aria-label="Your puzzle">
+      <div id="placeholder" class="placeholder">
+        <div class="big" aria-hidden="true">🔍</div>
+        <p>Your puzzle will pop up here!</p>
+        <p class="hint">Tip: press “Try an example”, then “Make my puzzle!”</p>
+      </div>
+
+      <div id="output" hidden>
+        <div class="toolbar no-print">
+          <button type="button" class="ghost" onclick="document.getElementById('generate').click()">🎲 New layout</button>
+          <button type="button" id="toggleAnswers" class="ghost" aria-pressed="false">👀 Show answers</button>
+          <button type="button" id="print" class="ghost">🖨️ Print</button>
+          <label class="bwtoggle" title="Black and white: great for printers without color ink"><input id="bw" type="checkbox"> Black &amp; white</label>
+          <button type="button" id="savePng" class="ghost">📷 Save image</button>
+          <button type="button" id="copyText" class="ghost">📋 Copy text</button>
+        </div>
+
+        <article class="sheet" id="sheet">
+          <div class="banner">
+            <span id="decoL" class="deco" aria-hidden="true"></span>
+            <h2 id="puzzleTitle">Word Search</h2>
+            <span id="decoR" class="deco" aria-hidden="true"></span>
+          </div>
+          <div id="nameDate" class="name-date"><span>Name: <i></i></span><span>Date: <i></i></span></div>
+          <div id="gridHolder" class="grid-holder">
+            <div class="board"><div id="grid" class="grid" aria-label="Wordsearch grid"></div></div>
+          </div>
+          <p class="solve-tip no-print">Tip: click letters to highlight them, and click words to cross them off.</p>
+          <h3 class="find">Find these words!</h3>
+          <ul id="wordList" class="word-list"></ul>
+          <p id="cheer" class="cheer" hidden>🎉 You found them all! Amazing! 🎉</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script src="dictionary.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
